@@ -46,17 +46,17 @@ msgstr ""
 `;
 }
 
-export function convert(json: string, meta: Metadata): string {
+export function convert(json: string, meta: Metadata, printOccurences: boolean): string {
   const document: I18NEntry[] = JSON.parse(json);
   let poEntries: PotEntry[] = [];
 
   for (let item of document) {
     let potEntry = new PotEntry();
     if (item.type === 'single') {
-      potEntry.parseSingleEntry(item);
+      potEntry.parseSingleEntry(item, printOccurences);
     }
     if (item.type === 'plural') {
-      potEntry.parsePluralEntry(item);
+      potEntry.parsePluralEntry(item, printOccurences);
     }
     poEntries.push(potEntry);
   }
@@ -83,12 +83,12 @@ export class PotEntry {
 
   public asString = () => this.items.join("\n");
 
-  public parseSingleEntry({ entry, comments, occurences, context, type }: SingleI18NEntry) {
+  public parseSingleEntry({ entry, comments, occurences, context, type }: SingleI18NEntry, printOccurences: boolean) {
     if (comments) {
       comments.forEach(this.addComment);
     }
 
-    if (occurences) {
+    if (occurences && printOccurences) {
       occurences.forEach(this.addOccurence);
     }
 
@@ -102,12 +102,12 @@ export class PotEntry {
     }
   }
 
-  public parsePluralEntry({ entry, comments, occurences, context, type }: PluralI18NEntry) {
+  public parsePluralEntry({ entry, comments, occurences, context, type }: PluralI18NEntry, printOccurences: boolean) {
     if (comments) {
       comments.forEach(this.addComment);
     }
 
-    if (occurences) {
+    if (occurences && printOccurences) {
       occurences.forEach(this.addOccurence);
     }
 

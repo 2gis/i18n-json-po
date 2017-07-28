@@ -7,6 +7,7 @@ const options = cli.parse({
   output: ['o', 'Output JSON file', 'string', '__stdout'],
   copyrightSubject: ['c', 'Copyright for generated POT file', 'string', ''],
   bugsEmail: ['b', 'Email for bugs', 'string', ''],
+  printOccurences: ['p', 'Print string occurence comments', 'boolean', false],
   year: ['y', 'Copyright year', 'number', (new Date()).getFullYear()],
   help: ['h', 'Show some help', 'bool', false]
 });
@@ -15,16 +16,18 @@ if (options.help) {
   console.log(`i18n JSON -> POT converter
 
 Options:
-   -h / --help                Show this help
-   -s / --src FILE            Define input JSON file name. Defaults 
-                              to stdin.
-   -o / --output FILE         Define output POT file name. If a file 
-                              already exists, it's contents will be
-                              overwritten. Defaults to stdout.
+   -h / --help                   Show this help
+   -s / --src FILE               Define input JSON file name. Defaults 
+                                 to stdin.
+   -o / --output FILE            Define output POT file name. If a file 
+                                 already exists, it's contents will be
+                                 overwritten. Defaults to stdout.
+   -p / --printOccurences        Print "#:" comments which indicate string 
+                                 occurences in source code.
    
-   -c / --copyrightSubject    Team name or author name.
-   -b / --bugsEmail           Email for sending bugs
-   -y / --year                Copyright year, defaults to current year.
+   -c / --copyrightSubject SUBJ  Team name or author name.
+   -b / --bugsEmail EMAIL        Email for sending bugs
+   -y / --year YEAR              Copyright year, defaults to current year.
 `);
   process.exit(0);
 }
@@ -40,7 +43,7 @@ const meta = {
 if (options.src === '__stdin') {
   cli.withStdin((data) => {
     try {
-      makeOutput(convert(data, meta), options.output);
+      makeOutput(convert(data, meta, options.printOccurences), options.output);
     } catch (e) {
       console.error(e);
       process.exit(1);
@@ -53,7 +56,7 @@ if (options.src === '__stdin') {
       process.exit(1);
     }
     try {
-      makeOutput(convert(data, meta), options.output);
+      makeOutput(convert(data, meta, options.printOccurences), options.output);
     } catch (e) {
       console.error(e);
       process.exit(1);
