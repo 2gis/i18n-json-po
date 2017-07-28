@@ -23,13 +23,8 @@ export function makeDate(date: Date) {
     tz;
 }
 
-export function convert(json: string, meta: Metadata): string {
-  const document: I18NEntry[] = JSON.parse(json);
-  let poEntries: PotEntry[] = [];
-
-  // 1) Make POT header
-  let poHeader =
-    `# Translations template for PROJECT.
+export function makePoHeader(meta: Metadata): string {
+  return `# Translations template for PROJECT.
 # Copyright (C) ${meta.year} ${meta.copyrightSubject}
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, ${meta.year}.
@@ -49,8 +44,12 @@ msgstr ""
 "Generated-By: i18n-json2po\\n"
 
 `;
+}
 
-  // 2) Make POT entries
+export function convert(json: string, meta: Metadata): string {
+  const document: I18NEntry[] = JSON.parse(json);
+  let poEntries: PotEntry[] = [];
+
   for (let item of document) {
     let potEntry = new PotEntry();
     if (item.type === 'single') {
@@ -62,7 +61,7 @@ msgstr ""
     poEntries.push(potEntry);
   }
 
-  return poHeader + poEntries
+  return makePoHeader(meta) + poEntries
     .map((entry) => entry.asString())
     .join("\n\n");
 }
