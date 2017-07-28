@@ -1,6 +1,6 @@
 "use strict";
 exports.__esModule = true;
-function makeDate(date) {
+function getTzOffset(date) {
     var timezoneShift = date.getTimezoneOffset() / -60;
     var tz = 'Z';
     if (timezoneShift !== 0) {
@@ -8,16 +8,20 @@ function makeDate(date) {
             (timezoneShift > 9 ? '' : '0')
             + timezoneShift + '00';
     }
+    return tz;
+}
+exports.getTzOffset = getTzOffset;
+function makeDate(date) {
     return date.getFullYear() + '-' +
-        (date.getMonth() > 9 ? '' : '0') + date.getMonth() + '-' +
-        (date.getDay() > 9 ? '' : '0') + date.getDay() + ' ' +
+        ((date.getMonth() + 1) > 9 ? '' : '0') + (date.getMonth() + 1) + '-' +
+        (date.getDate() > 9 ? '' : '0') + date.getDate() + ' ' +
         (date.getHours() > 9 ? '' : '0') + date.getHours() + ':' +
         (date.getMinutes() > 9 ? '' : '0') + date.getMinutes() +
-        tz;
+        getTzOffset(date);
 }
 exports.makeDate = makeDate;
-function makePoHeader(meta) {
-    return "# Translations template for PROJECT.\n# Copyright (C) " + meta.year + " " + meta.copyrightSubject + "\n# This file is distributed under the same license as the PROJECT project.\n# FIRST AUTHOR <EMAIL@ADDRESS>, " + meta.year + ".\n# \n#, fuzzy\nmsgid \"\"\nmsgstr \"\"\n\"Project-Id-Version: PROJECT VERSION\\n\"\n\"Report-Msgid-Bugs-To: " + meta.bugsEmail + "\\n\"\n\"POT-Creation-Date: " + makeDate(new Date()) + "\\n\"\n\"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\\n\"\n\"Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n\"\n\"Language-Team: LANGUAGE <LL@li.org>\\n\"\n\"MIME-Version: 1.0\\n\"\n\"Content-Type: text/plain; charset=utf-8\\n\"\n\"Content-Transfer-Encoding: 8bit\\n\"\n\"Generated-By: i18n-json2po\\n\"\n\n";
+function makePoHeader(meta, genDate) {
+    return "# Translations template for PROJECT.\n# Copyright (C) " + meta.year + " " + meta.copyrightSubject + "\n# This file is distributed under the same license as the PROJECT project.\n# FIRST AUTHOR <EMAIL@ADDRESS>, " + meta.year + ".\n# \n#, fuzzy\nmsgid \"\"\nmsgstr \"\"\n\"Project-Id-Version: PROJECT VERSION\\n\"\n\"Report-Msgid-Bugs-To: " + meta.bugsEmail + "\\n\"\n\"POT-Creation-Date: " + genDate + "\\n\"\n\"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\\n\"\n\"Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n\"\n\"Language-Team: LANGUAGE <LL@li.org>\\n\"\n\"MIME-Version: 1.0\\n\"\n\"Content-Type: text/plain; charset=utf-8\\n\"\n\"Content-Transfer-Encoding: 8bit\\n\"\n\"Generated-By: i18n-json2po\\n\"\n\n";
 }
 exports.makePoHeader = makePoHeader;
 function convert(json, meta, printOccurences) {
@@ -34,7 +38,7 @@ function convert(json, meta, printOccurences) {
         }
         poEntries.push(potEntry);
     }
-    return makePoHeader(meta) + poEntries
+    return makePoHeader(meta, makeDate(new Date())) + poEntries
         .map(function (entry) { return entry.asString(); })
         .join("\n\n");
 }
@@ -42,7 +46,6 @@ exports.convert = convert;
 var PotEntry = (function () {
     function PotEntry() {
         var _this = this;
-        this.items = [];
         this.addComment = function (comment) { return _this.items.push('#. ' + comment); };
         this.addOccurence = function (occ) { return _this.items.push('#: ' + occ); };
         this.addContext = function (context) { return _this.items.push('msgctxt ' + JSON.stringify(context)); };
@@ -58,6 +61,7 @@ var PotEntry = (function () {
     }
     PotEntry.prototype.parseSingleEntry = function (_a, printOccurences) {
         var entry = _a.entry, comments = _a.comments, occurences = _a.occurences, context = _a.context, type = _a.type;
+        this.items = [];
         if (comments) {
             comments.forEach(this.addComment);
         }
@@ -71,9 +75,11 @@ var PotEntry = (function () {
             this.addMsgid(entry);
             this.addMsgstr();
         }
+        return this;
     };
     PotEntry.prototype.parsePluralEntry = function (_a, printOccurences) {
         var entry = _a.entry, comments = _a.comments, occurences = _a.occurences, context = _a.context, type = _a.type;
+        this.items = [];
         if (comments) {
             comments.forEach(this.addComment);
         }
@@ -88,6 +94,7 @@ var PotEntry = (function () {
             this.addMsgidPlural(entry[entry.length - 1]);
             this.addMsgstrPlural(entry.length);
         }
+        return this;
     };
     return PotEntry;
 }());
