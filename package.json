@@ -2,9 +2,21 @@
   "name": "i18n-json-po",
   "version": "1.0.0",
   "description": "i18n .json to .pot file converter",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "karma start --browsers Firefox --single-run",
+    "testwatch": "karma start --browsers Firefox",
+    "build": "tsc index.ts --outDir dist"
+  },
+  "keywords": [
+    "i18n"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/2gis/jsonpo"
+  },
+  "bin": {
+    "jsonpo": "./bin/jsonpo"
   },
   "author": "",
   "license": "MIT",
