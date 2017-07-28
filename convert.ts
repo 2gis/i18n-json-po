@@ -6,7 +6,7 @@ export type Metadata = {
   year: number
 };
 
-export function makeDate(date: Date) {
+export function getTzOffset(date: Date) {
   const timezoneShift = date.getTimezoneOffset() / -60;
   let tz = 'Z';
   if (timezoneShift !== 0) {
@@ -15,15 +15,19 @@ export function makeDate(date: Date) {
       + timezoneShift + '00';
   }
 
-  return date.getFullYear() + '-' +
-    (date.getMonth() > 9 ? '' : '0') + date.getMonth() + '-' +
-    (date.getDay() > 9 ? '' : '0') + date.getDay() + ' ' +
-    (date.getHours() > 9 ? '' : '0') + date.getHours() + ':' +
-    (date.getMinutes() > 9 ? '' : '0') + date.getMinutes() +
-    tz;
+  return tz;
 }
 
-export function makePoHeader(meta: Metadata): string {
+export function makeDate(date: Date) {
+  return date.getFullYear() + '-' +
+    ((date.getMonth() + 1) > 9 ? '' : '0') + (date.getMonth() + 1) + '-' +
+    (date.getDate() > 9 ? '' : '0') + date.getDate() + ' ' +
+    (date.getHours() > 9 ? '' : '0') + date.getHours() + ':' +
+    (date.getMinutes() > 9 ? '' : '0') + date.getMinutes() +
+    getTzOffset(date);
+}
+
+export function makePoHeader(meta: Metadata, genDate: string): string {
   return `# Translations template for PROJECT.
 # Copyright (C) ${meta.year} ${meta.copyrightSubject}
 # This file is distributed under the same license as the PROJECT project.
@@ -34,7 +38,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\\n"
 "Report-Msgid-Bugs-To: ${meta.bugsEmail}\\n"
-"POT-Creation-Date: ${makeDate(new Date())}\\n"
+"POT-Creation-Date: ${genDate}\\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
 "Language-Team: LANGUAGE <LL@li.org>\\n"
@@ -61,13 +65,13 @@ export function convert(json: string, meta: Metadata, printOccurences: boolean):
     poEntries.push(potEntry);
   }
 
-  return makePoHeader(meta) + poEntries
+  return makePoHeader(meta, makeDate(new Date())) + poEntries
     .map((entry) => entry.asString())
     .join("\n\n");
 }
 
 export class PotEntry {
-  private items: string[] = [];
+  private items: string[];
 
   protected addComment = (comment: string) => this.items.push('#. ' + comment);
   protected addOccurence = (occ: string) => this.items.push('#: ' + occ);
@@ -83,7 +87,8 @@ export class PotEntry {
 
   public asString = () => this.items.join("\n");
 
-  public parseSingleEntry({ entry, comments, occurences, context, type }: SingleI18NEntry, printOccurences: boolean) {
+  public parseSingleEntry({ entry, comments, occurences, context, type }: SingleI18NEntry, printOccurences: boolean): PotEntry {
+    this.items = [];
     if (comments) {
       comments.forEach(this.addComment);
     }
@@ -100,9 +105,12 @@ export class PotEntry {
       this.addMsgid(entry);
       this.addMsgstr();
     }
+
+    return this;
   }
 
-  public parsePluralEntry({ entry, comments, occurences, context, type }: PluralI18NEntry, printOccurences: boolean) {
+  public parsePluralEntry({ entry, comments, occurences, context, type }: PluralI18NEntry, printOccurences: boolean): PotEntry {
+    this.items = [];
     if (comments) {
       comments.forEach(this.addComment);
     }
@@ -120,5 +128,7 @@ export class PotEntry {
       this.addMsgidPlural(entry[entry.length - 1]);
       this.addMsgstrPlural(entry.length);
     }
+
+    return this;
   }
 }
