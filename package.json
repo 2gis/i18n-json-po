@@ -1,6 +1,6 @@
 {
   "name": "i18n-json-po",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "i18n .json to .pot file converter",
   "main": "dist/index.js",
   "scripts": {
@@ -24,7 +24,6 @@
     "@types/cli": "^0.11.19",
     "array-xor": "^0.1.1",
     "browserify": "^14.4.0",
-    "cli": "^1.0.1",
     "eslint": "3.13.1",
     "i18n-proto": "1.0.1",
     "karma": "1.7.0",
@@ -40,5 +39,8 @@
     "typescript": "^2.4.2",
     "uglify-js": "3.0.18",
     "watchify": "^3.9.0"
+  },
+  "dependencies": {
+    "cli": "^1.0.1"
   }
 }
