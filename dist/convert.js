@@ -91,7 +91,9 @@ var PotEntry = (function () {
         }
         if (type === 'plural') {
             this.addMsgid(entry[0]);
-            this.addMsgidPlural(entry[entry.length - 1]);
+            // extracted original entries contain only first and
+            // last plurals forms, which identify the entry
+            this.addMsgidPlural(entry[1]);
             this.addMsgstrPlural(entry.length);
         }
         return this;
