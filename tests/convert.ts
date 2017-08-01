@@ -54,8 +54,7 @@ msgstr ""
       entry: 'entry "quoted" text',
       context: 'entry "quoted" context',
       occurences: ['occ1', 'occ2'],
-      comments: ['cmt1', 'cmt2'],
-      translations: []
+      comments: ['cmt1', 'cmt2']
     };
 
     let expected = `#. cmt1
