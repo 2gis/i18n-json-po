@@ -4,7 +4,7 @@ import { convert } from './convert';
 
 const options = cli.parse({
   src: ['s', 'A source JSON file to process', 'string', '__stdin'],
-  output: ['o', 'Output JSON file', 'string', '__stdout'],
+  output: ['o', 'Output POT file', 'string', '__stdout'],
   copyrightSubject: ['c', 'Copyright for generated POT file', 'string', ''],
   bugsEmail: ['b', 'Email for bugs', 'string', ''],
   printOccurences: ['p', 'Print string occurence comments', 'boolean', false],
