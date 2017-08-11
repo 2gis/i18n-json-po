@@ -1,6 +1,6 @@
 import * as cli from 'cli';
 import { readFile, writeFile } from 'fs';
-import { convert } from './convert';
+import { convert, InitialMeta } from './convert';
 
 const options = cli.parse({
   src: ['s', 'A source JSON file to process', 'string', '__stdin'],
@@ -34,7 +34,7 @@ Options:
 
 console.warn('Running conversion for file: ', options.src);
 
-const meta = {
+const meta: InitialMeta = {
   copyrightSubject: options.copyrightSubject,
   bugsEmail: options.bugsEmail,
   year: options.year,

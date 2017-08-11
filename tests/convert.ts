@@ -1,6 +1,6 @@
 import * as assert from 'assert';
-import { PluralI18NEntry, SingleI18NEntry } from 'i18n-proto';
-import { Metadata, PotEntry, makeDate, getTzOffset, makePoHeader } from '../convert';
+import { PluralI18NEntry, SingleI18NEntry, TranslationMeta } from 'i18n-proto';
+import { InitialMeta, PotEntry, makeDate, getTzOffset, makePoHeader } from '../convert';
 const xor = require('array-xor');
 
 describe('JSON to PO converter', () => {
@@ -13,7 +13,7 @@ describe('JSON to PO converter', () => {
   });
 
   it('Makes valid POT header', () => {
-    let m: Metadata = {
+    let m: InitialMeta = {
       copyrightSubject: 'cool team',
       bugsEmail: 'bugs@team.com',
       year: 2044
@@ -40,11 +40,89 @@ msgstr ""
 `;
     assert.deepEqual(
       xor(
-        makePoHeader(m, 'SOMEDATE').split("\n"),
+        makePoHeader({
+          initialMeta: m,
+          genDate: 'SOMEDATE',
+          hasPluralForms: false
+        }).split("\n"),
         expected.split("\n")
       ),
       []
     );
+  });
+
+  it('Makes valid PO header from existing meta', () => {
+    let input: TranslationMeta = {
+      projectIdVersion: '2gis-online',
+      reportMsgidBugsTo: 'online4@2gis.ru',
+      potCreationDate: '2017-07-14 11:29+0700',
+      poRevisionDate: '2017-06-30 15:30+0700',
+      lastTranslator: {
+        name: '2GIS',
+        email: 'crowdin@2gis.ru'
+      },
+      language: 'cs_CZ',
+      languageTeam: 'Czech',
+      pluralForms: 'nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2',
+      mimeVersion: '1.0',
+      contentType: 'text/plain; charset=utf-8',
+      contentTransferEncoding: '8bit',
+      generatedBy: 'Babel 2.1.1'
+    };
+
+    let expected = `msgid ""
+msgstr ""
+"Project-Id-Version: 2gis-online\\n"
+"Report-Msgid-Bugs-To: online4@2gis.ru\\n"
+"POT-Creation-Date: 2017-07-14 11:29+0700\\n"
+"PO-Revision-Date: 2017-06-30 15:30+0700\\n"
+"Last-Translator: 2GIS <crowdin@2gis.ru>\\n"
+"Language: cs_CZ\\n"
+"Language-Team: Czech\\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2\\n"
+"MIME-Version: 1.0\\n"
+"Content-Type: text/plain; charset=utf-8\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"Generated-By: Babel 2.1.1\\n"
+
+`;
+
+    assert.deepEqual(xor(
+      makePoHeader({ meta: input, initialMeta: {}, genDate: 'SOMEDATE', hasPluralForms: true }).split("\n"),
+      expected.split("\n")
+    ), []);
+  });
+
+  it('Properly handles absence of Plural-Forms header', () => {
+    let input = {
+      projectIdVersion: '2gis-online',
+      reportMsgidBugsTo: 'online4@2gis.ru',
+      potCreationDate: '2017-07-14 11:29+0700',
+      poRevisionDate: '2017-06-30 15:30+0700',
+      lastTranslator: {
+        name: '2GIS',
+        email: 'crowdin@2gis.ru'
+      },
+      language: 'cs_CZ',
+      languageTeam: 'Czech',
+      mimeVersion: '1.0',
+      contentType: 'text/plain; charset=utf-8',
+      contentTransferEncoding: '8bit',
+      generatedBy: 'Babel 2.1.1'
+    } as TranslationMeta; // Explicit casting to emulate bad JSON
+
+    let catched = [];
+    try {
+      makePoHeader({ meta: input, initialMeta: {}, genDate: 'SOMEDATE', hasPluralForms: true })
+    } catch (e) {
+      catched.push(e);
+    }
+
+    assert.equal(catched.length, 1);
+    assert.equal(catched[0].message, 'Translation has some plural forms, but Plural-Forms header was not found');
+
+    // Should not throw exceptions without hasPluralForms
+    assert.notEqual(makePoHeader({ meta: input, initialMeta: {}, genDate: 'SOMEDATE', hasPluralForms: false }), undefined);
   });
 
   it('Parses single i18n entry', () => {
@@ -72,13 +150,13 @@ msgid "entry \\"quoted\\" text"
 msgstr ""`;
 
     let xor1 = xor(
-      entry.parseSingleEntry(i18nEntry, true).asString().split("\n"),
+      entry.parseSingleEntry(i18nEntry, true, true).asString().split("\n"),
       expected.split("\n")
     );
     assert.deepEqual(xor1, [], "Parsing with occurences failed. Xordiff: " + JSON.stringify(xor1));
 
     let xor2 = xor(
-      entry.parseSingleEntry(i18nEntry, false).asString().split("\n"),
+      entry.parseSingleEntry(i18nEntry, false, true).asString().split("\n"),
       expectedWithoutOccurences.split("\n")
     );
     assert.deepEqual(xor2, [], "Parsing without occurences failed. Xordiff: " + JSON.stringify(xor2));
@@ -114,13 +192,13 @@ msgstr[0] ""
 msgstr[1] ""`;
 
     let xor1 = xor(
-      entry.parsePluralEntry(i18nEntry, true).asString().split("\n"),
+      entry.parsePluralEntry(i18nEntry, true, true).asString().split("\n"),
       expected.split("\n")
     );
     assert.deepEqual(xor1, [], "Parsing with occurences failed. Xordiff: " + JSON.stringify(xor1));
 
     let xor2 = xor(
-      entry.parsePluralEntry(i18nEntry, false).asString().split("\n"),
+      entry.parsePluralEntry(i18nEntry, false, true).asString().split("\n"),
       expectedWithoutOccurences.split("\n")
     );
     assert.deepEqual(xor2, [], "Parsing without occurences failed. Xordiff: " + JSON.stringify(xor2));

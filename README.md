@@ -18,7 +18,7 @@ Options:
    -h / --help                   Show this help
    -s / --src FILE               Define input JSON file name. Defaults
                                  to stdin.
-   -o / --output FILE            Define output POT file name. If a file
+   -o / --output FILE            Define output PO[T] file name. If a file
                                  already exists, it's contents will be
                                  overwritten. Defaults to stdout.
    -p / --printOccurences        Print "#:" comments which indicate string
@@ -28,11 +28,15 @@ Options:
    -b / --bugsEmail EMAIL        Email for sending bugs
    -y / --year YEAR              Copyright year, defaults to current year.
 ```
-Be default jsonpo accepts input JSON file from stdin, so it's possible to combine it with [i18n-stex](https://github.com/2gis/stex) nicely:
+By default `jsonpo` accepts input JSON file from stdin, so it's possible to combine it with [i18n-stex](https://github.com/2gis/stex) nicely:
 ```
 $ stex -s 'src/**/*.ts' | jsonpo -p > strings.pot
 ```
 Output defaults to stdout, so you can use standard unix stream redirection syntax.
+
+### PO and POT
+
+By default, if optional `meta` field is not present in input file, `jsonpo` creates POT (template) file **without any translations**. If you need to add translations into file, you MUST pass `meta` field according to its format. This will result in fully translated PO file. Note that if your translations include plural forms, you MUST provide `pluralForms` member in `meta` field: this field should contain formula describing how to choose proper plural form. See `Plural-Forms` header in gettext's PO file description.
 
 ## API usage
 
