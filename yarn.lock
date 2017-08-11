@@ -1795,9 +1795,9 @@ https-browserify@~0.0.0:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/https-browserify/-/https-browserify-0.0.1.tgz#3f91365cabe60b77ed0ebba24b454e3e09d95a82"
 
-i18n-proto@1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/i18n-proto/-/i18n-proto-1.0.4.tgz#fe9803542f2f5f1ccfb019da88f1bc14472eef42"
+i18n-proto@1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/i18n-proto/-/i18n-proto-1.0.5.tgz#5688a311022b46ca25612a15d53bee649930da0d"
 
 iconv-lite@0.4.15:
   version "0.4.15"
